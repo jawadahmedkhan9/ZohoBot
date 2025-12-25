@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Zoho Books AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        /* Top Navigation */
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            background: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        .nav-tab.active {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #15803d;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .user-org {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: #1a1a1a;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .stat-trend.negative {
+            color: #ef4444;
+        }
+
+        /* Quick Actions */
+        .section {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 18px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            background: white;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .action-btn.primary {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .action-btn.primary:hover {
+            background: #000;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .chart-header {
+            margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.3px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #fafafa;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .amount {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .amount.positive {
+            color: #22c55e;
+        }
+
+        .amount.negative {
+            color: #ef4444;
+        }
+
+        /* Recent Items */
+        .recent-items {
+            list-style: none;
+        }
+
+        .recent-items li {
+            padding: 16px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.2s;
+        }
+
+        .recent-items li:last-child {
+            border-bottom: none;
+        }
+
+        .recent-items li:hover {
+            background: #fafafa;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-number {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .item-amount {
+            font-weight: 700;
+            font-size: 16px;
+            color: #1a1a1a;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-left: 12px;
+        }
+
+        .badge.paid {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+
+        .badge.unpaid {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .badge.overdue {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f5f5f5;
+            border-top-color: #1a1a1a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error Banner */
+        .error-banner {
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: none;
+            border: 1px solid #fecaca;
+        }
+
+        .error-banner.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .topbar {
+                padding: 0 16px;
+            }
+
+            .topbar-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav class="topbar">
+        <div class="topbar-left">
+            <div class="logo">Zoho Books AI</div>
+            <div class="nav-tabs">
+                <a href="/dashboard" class="nav-tab active">Dashboard</a>
+                <a href="/chat" class="nav-tab">Chat</a>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="user-info" id="userInfo" style="display: none;">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Loading...</div>
+                    <div class="user-org" id="userOrg">Organization</div>
+                </div>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>Connected</span>
+            </div>
+            <a href="/" class="nav-tab">Sign Out</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Error Banner -->
+        <div class="error-banner" id="errorBanner"></div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Dashboard</h1>
+            <p>Real-time insights from your Zoho Books data</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-value" id="statRevenue">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Outstanding</div>
+                </div>
+                <div class="stat-value" id="statOutstanding">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Overdue</div>
+                </div>
+                <div class="stat-value" id="statOverdue">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Customers</div>
+                </div>
+                <div class="stat-value" id="statCustomers">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Invoices</div>
+                </div>
+                <div class="stat-value" id="statInvoices">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-label">Expenses</div>
+                </div>
+                <div class="stat-value" id="statExpenses">—</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="quick-actions">
+                <a href="/chat" class="action-btn primary">Open Chat</a>
+                <button onclick="exportInvoices()" class="action-btn">Export Invoices</button>
+                <button onclick="exportExpenses()" class="action-btn">Export Expenses</button>
+                <button onclick="exportCustomers()" class="action-btn">Export Customers</button>
+                <button onclick="refreshData()" class="action-btn">Refresh Data</button>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Revenue Trend</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Invoice Status</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Customers Chart -->
+        <div class="chart-card" style="margin-bottom: 24px;">
+            <div class="chart-header">
+                <h3>Top Customers by Revenue</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="customersChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Aging Report -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Accounts Receivable Aging</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Count</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agingTableBody">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #999;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Invoices -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Recent Invoices</h2>
+            </div>
+            <ul class="recent-items" id="recentInvoices">
+                <li>Loading...</li>
+            </ul>
+        </div>
+
+        <!-- Overdue Invoices -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Payment Reminders</h2>
+            </div>
+            <ul class="recent-items" id="overdueInvoices">
+                <li>Loading...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let revenueChart, statusChart, customersChart;
+
+        // Fetch and display dashboard data
+        
+        // Fetch and display user information
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user/info');
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                // Update user info
+                const userName = data.user?.name || data.user?.email || 'User';
+                const userEmail = data.user?.email || '';
+                const orgName = data.organization?.name || 'Organization';
+                
+                // Get initials for avatar
+                const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                
+                document.getElementById('userAvatar').textContent = initials;
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userOrg').textContent = orgName;
+                document.getElementById('userInfo').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+            }
+        }
+
+        async function loadDashboard() {
+            showLoading(true);
+            try {
+                // Fetch stats
+                const statsResponse = await fetch('/api/dashboard/stats');
+                if (!statsResponse.ok) throw new Error('Failed to fetch stats');
+                const stats = await statsResponse.json();
+                
+                // Update stats cards
+                document.getElementById('statRevenue').textContent = formatCurrency(stats.total_revenue);
+                document.getElementById('statOutstanding').textContent = formatCurrency(stats.outstanding_amount);
+                document.getElementById('statOverdue').textContent = formatCurrency(stats.overdue_amount);
+                document.getElementById('statCustomers').textContent = stats.total_customers;
+                document.getElementById('statInvoices').textContent = stats.total_invoices;
+                document.getElementById('statExpenses').textContent = formatCurrency(stats.total_expenses);
+
+                // Fetch chart data
+                const chartsResponse = await fetch('/api/dashboard/charts');
+                if (!chartsResponse.ok) throw new Error('Failed to fetch charts');
+                const charts = await chartsResponse.json();
+
+                // Create charts
+                createRevenueChart(charts.revenue_trend);
+                createStatusChart(charts.invoice_status);
+                createCustomersChart(charts.top_customers);
+
+                // Load recent invoices
+                displayRecentInvoices(stats.recent_invoices);
+
+                // Fetch aging report
+                await loadAgingReport();
+
+                // Fetch overdue invoices
+                await loadOverdueInvoices();
+
+            } catch (error) {
+                showError('Failed to load dashboard: ' + error.message);
+                console.error('Dashboard error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadAgingReport() {
+            try {
+                const response = await fetch('/api/reports/aging');
+                if (!response.ok) throw new Error('Failed to fetch aging report');
+                const report = await response.json();
+
+                const tbody = document.getElementById('agingTableBody');
+                tbody.innerHTML = '';
+
+                const bucketLabels = {
+                    'current': 'Current',
+                    '1-30': '1-30 Days',
+                    '31-60': '31-60 Days',
+                    '61-90': '61-90 Days',
+                    '90+': '90+ Days'
+                };
+
+                for (const [bucket, data] of Object.entries(report.aging_buckets)) {
+                    if (data.count > 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${bucketLabels[bucket]}</td>
+                            <td>${data.count}</td>
+                            <td class="amount ${bucket !== 'current' ? 'negative' : ''}">${formatCurrency(data.amount)}</td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                }
+
+                // Add total row
+                const totalRow = document.createElement('tr');
+                totalRow.style.fontWeight = '700';
+                totalRow.style.background = '#fafafa';
+                totalRow.innerHTML = `
+                    <td>Total Outstanding</td>
+                    <td>${report.total_invoices}</td>
+                    <td class="amount">${formatCurrency(report.total_outstanding)}</td>
+                `;
+                tbody.appendChild(totalRow);
+
+            } catch (error) {
+                console.error('Aging report error:', error);
+            }
+        }
+
+        async function loadOverdueInvoices() {
+            try {
+                const response = await fetch('/api/reports/overdue');
+                if (!response.ok) throw new Error('Failed to fetch overdue invoices');
+                const data = await response.json();
+
+                const list = document.getElementById('overdueInvoices');
+                
+                if (data.overdue_invoices.length === 0) {
+                    list.innerHTML = '<li style="color: #22c55e; font-weight: 600;">No overdue invoices</li>';
+                    return;
+                }
+
+                list.innerHTML = '';
+                data.overdue_invoices.slice(0, 10).forEach(invoice => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="item-details">
+                            <div class="item-number">${invoice.invoice_number}</div>
+                            <div class="item-meta">${invoice.customer_name} • ${invoice.days_overdue} days overdue</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="item-amount">${formatCurrency(invoice.balance)}</div>
+                            <span class="badge overdue">Overdue</span>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+
+            } catch (error) {
+                console.error('Overdue invoices error:', error);
+            }
+        }
+
+        function displayRecentInvoices(invoices) {
+            const list = document.getElementById('recentInvoices');
+            list.innerHTML = '';
+
+            if (!invoices || invoices.length === 0) {
+                list.innerHTML = '<li>No recent invoices</li>';
+                return;
+            }
+
+            invoices.forEach(invoice => {
+                const li = document.createElement('li');
+                const statusBadge = invoice.status === 'paid' ? 'paid' : 
+                                   invoice.status === 'overdue' ? 'overdue' : 'unpaid';
+                li.innerHTML = `
+                    <div class="item-details">
+                        <div class="item-number">${invoice.invoice_number}</div>
+                        <div class="item-meta">${invoice.customer_name} • ${invoice.date}</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="item-amount">${formatCurrency(invoice.total)}</div>
+                        <span class="badge ${statusBadge}">${invoice.status}</span>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function createRevenueChart(data) {
+            const ctx = document.getElementById('revenueChart');
+            if (revenueChart) revenueChart.destroy();
+            
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data.data,
+                        borderColor: '#1a1a1a',
+                        backgroundColor: 'rgba(26, 26, 26, 0.05)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#1a1a1a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f5f5f5' },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createStatusChart(data) {
+            const ctx = document.getElementById('statusChart');
+            if (statusChart) statusChart.destroy();
+            
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: ['#22c55e', '#fbbf24', '#ef4444', '#1a1a1a', '#6b7280'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 16,
+                                font: { size: 12, weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCustomersChart(data) {
+            const ctx = document.getElementById('customersChart');
+            if (customersChart) customersChart.destroy();
+            
+            customersChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data.data,
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#f5f5f5' },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Export functions
+        async function exportInvoices() {
+            try {
+                showLoading(true);
+                const response = await fetch('/api/export/invoices/csv');
+                if (!response.ok) throw new Error('Export failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `invoices_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                showError('Failed to export invoices');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function exportExpenses() {
+            try {
+                showLoading(true);
+                const response = await fetch('/api/export/expenses/csv');
+                if (!response.ok) throw new Error('Export failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `expenses_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                showError('Failed to export expenses');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function exportCustomers() {
+            try {
+                showLoading(true);
+                const response = await fetch('/api/export/customers/csv');
+                if (!response.ok) throw new Error('Export failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `customers_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                showError('Failed to export customers');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function refreshData() {
+            try {
+                await fetch('/api/cache/clear');
+                await loadDashboard();
+            } catch (error) {
+                console.error('Refresh error:', error);
+            }
+        }
+
+        // Utility functions
+        function formatCurrency(value) {
+            // Format with SAR prefix
+            const formatted = new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+            return `SAR ${formatted}`;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        function showError(message) {
+            const banner = document.getElementById('errorBanner');
+            banner.textContent = message;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 5000);
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+        loadUserInfo();
+
+        // Auto-refresh every 5 minutes
+        setInterval(loadDashboard, 300000);
+    </script>
+</body>
+</html>
